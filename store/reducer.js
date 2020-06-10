@@ -13,9 +13,8 @@ const reducer = (state = initialState, action) => {
             // Attention! This will overwrite client state! Real apps should use proper reconciliation.
             return {...state, ...action.payload};
         case 'UPDATE_LANGUAGE':
-            const newLanguage = state.language === 'en' ? 'zh' : 'en';
-            print(action.type, 'green', newLanguage)
-            return { ...state, language: newLanguage }
+            print(action.type, 'green', action.language)
+            return { ...state, language: action.language }
         case 'ADD_COUNT':
             print(action.type, 'green', state.count + 1)
             return { ...state, count: state.count + 1 }

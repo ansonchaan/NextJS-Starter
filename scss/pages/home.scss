@@ -1,19 +1,4 @@
 #home {
     width:100%;
     height:auto;
-    #featuredVideo{
-        width:100%;
-        height:100vh;
-        // background:url('/images/banner.jpg') center / cover no-repeat;
-        position: relative;
-        .bigSectionTitle{
-            color:$white;
-            position: absolute;
-            bottom:rem-calc(25);
-            left:0;
-        }
-    }
-    #latestShow{
-
-    }
 }

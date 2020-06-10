@@ -4,27 +4,25 @@ import {useRef , useEffect} from 'react';
 //	styling console.log
 //
 export const print = (state, color, text) =>{
-	const msg = (typeof text == 'object')? JSON.stringify(text) : text || '';
-	return console.log('%c'+state+'%c %s','color:white;font-family:sans-serif;font-size:10px;font-weight:bold;background:'+color+';padding:4px 6px 3px 5px;border-radius:3px;', '', msg);
+  if(process.browser) {
+    const msg = (typeof text == 'object')? JSON.stringify(text) : text || '';
+    console.log('%c'+state+'%c %s','color:white;font-family:sans-serif;font-size:10px;font-weight:bold;background:'+color+';padding:4px 6px 3px 5px;border-radius:3px;', '', msg);
+  }
 }
 
 //
 // enlarge font size on large screen
 //
 export const adjustFontSize = (baseFontRatio = 18 / 1200, fontMultiplier = 0.84375) => {
-    if(process.browser) {
-      const width = window.innerWidth;
-      const roundedNumber = Math.round(
-        baseFontRatio * width * fontMultiplier
-      );
+  const width = window.innerWidth;
+  const roundedNumber = Math.round(
+    baseFontRatio * width * fontMultiplier
+  );
 
-      if (roundedNumber >= 16)
-          document.documentElement.style.fontSize = roundedNumber + "px";
-      else 
-          document.documentElement.style.fontSize = "";
-    }
-    else
-      return false
+  if (roundedNumber >= 16)
+      document.documentElement.style.fontSize = roundedNumber + "px";
+  else 
+      document.documentElement.style.fontSize = "";
 };
 
 //
@@ -634,6 +632,10 @@ export const SmoothScroll = function(elem, scrollFunc) {
   var destroy = function(){
     removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
     removeEvent(window, "resize", onResize);
+    _this.scrollBarOuterWrap.remove();
+    _this.scrollBarOuterWrap = null;
+    _this.scrollBarWrap = null;
+    _this.scrollBar = null;
   }
 
   var onResize = function() {
