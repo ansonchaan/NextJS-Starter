@@ -1,0 +1,65 @@
+$defaultFont: 'Noto Serif TC', serif;
+
+.sans{
+  $defaultFont: 'Noto Serif TC', sans-serif;
+}
+
+.m{
+  font-weight: 500;
+}
+.sb{
+  font-weight: 600;
+}
+
+
+//120
+//100
+//90
+//70
+//50
+//45
+//44
+//31
+//30
+//26
+//22
+//21
+//10
+
+.bigSectionTitle{
+  @include setFont(100, 144);
+}
+.sectionTitle{
+  @include setFont(45, 65);
+}
+
+h1,
+.h1 {
+  @include setFont;
+}
+
+h2,
+.h2 {
+  @include setFont(20, 24);
+}
+h3,
+.h3 {
+  @include setFont(13, 24);
+}
+h4 {
+}
+h5 {
+}
+h6,
+.h6 {
+  @include setFont(12, 18);
+}
+
+// tablet
+@media only screen and (max-width: $tablet) {
+  @include setFont(22, 34);
+}
+
+// mobile
+@media only screen and (max-width: $mobile) {
+}

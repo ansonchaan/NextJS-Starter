@@ -1,0 +1,19 @@
+@import "./global/functions.scss";
+@import "./global/reset.scss";
+@import "./global/fonts.scss";
+@import "./global/color.scss";
+
+// Common
+@import "./common.scss";
+
+// Components
+@import "./components/nav.scss";
+@import "./components/footer.scss";
+
+// Pages
+@import "./pages/home.scss";
+@import "./pages/about.scss";
+
+
+// IE
+// @import './global/ie';
