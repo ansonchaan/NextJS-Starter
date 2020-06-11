@@ -630,28 +630,32 @@ export const SmoothScroll = function(elem, scrollFunc) {
   };
   
   var destroy = function(){
-    removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
-    removeEvent(window, "resize", onResize);
-    _this.scrollBarOuterWrap.remove();
-    _this.scrollBarOuterWrap = null;
-    _this.scrollBarWrap = null;
-    _this.scrollBar = null;
+    // removeEvent(window, "resize", onResize);
+    if(_this.scrollBarOuterWrap){
+      removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
+      _this.scrollBarOuterWrap.remove();
+      _this.scrollBarOuterWrap = null;
+      _this.scrollBarWrap = null;
+      _this.scrollBar = null;
+    }
   }
 
   var onResize = function() {
     parentHeight = _this.elem.parentNode.offsetHeight;
 
-    if (isMobile()) {
-      if (isOn) {
+    if(isMobile()) {
+      if(isOn) {
+        console.log('off');
         off();
         setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
       }
     } else {
-      if (!isOn) {
-        // reset();
+      if(!isOn) {
+        console.log('on');
+        initScrollBar();
         on();
       }
-      if (disable) onEnable();
+      if(disable) onEnable();
     }
   };
   var onDisable = function() {
@@ -667,11 +671,14 @@ export const SmoothScroll = function(elem, scrollFunc) {
   };
   var onHideScrollBar = function() {
     showScrollBar = false;
-    addClass(_this.scrollBarWrap,'hide');
+    if(_this.scrollBarWrap) addClass(_this.scrollBarWrap,'hide');
   };
 
   var init = function() {
-    initScrollBar();
+    if(!isMobile()){
+      initScrollBar();
+      on();
+    }
     addEvent(window, "resize", onResize);
   };
 

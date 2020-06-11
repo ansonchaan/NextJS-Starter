@@ -13,7 +13,7 @@ const Main = (props) => {
     
     useEffect(()=>{
         let smooth = new SmoothScroll('#scrollWrap',(s, y, h) => {});
-        smooth.on();
+        // smooth.on();
         return () => { 
             smooth.off();
             smooth = null;

@@ -1,15 +1,16 @@
 import { useEffect } from "react";
 import { useRouter } from 'next/router';
+import Home from './[lang]';
 
 const Index = () => {
     const route = useRouter();
 
     useEffect(()=>{
-        route.push('/[lang]', '/en');
+        route.replace('/[lang]', '/en');
     })
 
     return (
-        <div>loading...</div>
+        <Home/>
     )
 }
 
