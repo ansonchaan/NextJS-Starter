@@ -611,20 +611,23 @@ export const SmoothScroll = function(elem, scrollFunc) {
     targetY = y;
   };
 
+  const vs = VirtualScroll();
+  const fi = FrameImpulse();
   var isOn = false;
   var on = function() {
     isOn = true;
     refresh();
     onResize();
+    initScrollBar();
     onShowScrollBar();
-    VirtualScroll().on(onScroll);
-    FrameImpulse().on(onAnim);
+    vs.on(onScroll);
+    fi.on(onAnim);
   };
 
   var off = function() {
     isOn = false;
-    VirtualScroll().off(onScroll);
-    FrameImpulse().off(onAnim);
+    vs.off(onScroll);
+    fi.off(onAnim);
     onHideScrollBar();
     destroy();
   };
@@ -645,13 +648,11 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
     if(isMobile()) {
       if(isOn) {
-        console.log('off');
         off();
         setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
       }
     } else {
       if(!isOn) {
-        console.log('on');
         initScrollBar();
         on();
       }
@@ -676,7 +677,6 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
   var init = function() {
     if(!isMobile()){
-      initScrollBar();
       on();
     }
     addEvent(window, "resize", onResize);
