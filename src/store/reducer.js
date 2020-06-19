@@ -1,4 +1,4 @@
-import { print } from '../globalFunc';
+import { print } from '../../globalFunc';
 import { HYDRATE } from 'next-redux-wrapper';
 
 export const initialState = {

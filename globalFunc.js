@@ -432,7 +432,7 @@ export const SmoothScroll = function(elem, scrollFunc) {
   var _this = this;
 
   // Grab both red boxes
-  this.elem = document.querySelector(elem);
+  this.elem = elem;
 
   // Check how much we can scroll. This value is the
   // height of the scrollable element minus the height of the widow
@@ -508,6 +508,34 @@ export const SmoothScroll = function(elem, scrollFunc) {
     // lazyLoad.checkAndShowImg();
   };
 
+  addEvent(document, 'mousemove', function(e){
+    if(_this.scrollBarOuterWrap){
+      const hasParent = e.target.closest('#contentScroll');
+      const isScrollbar = e.target.closest('#scrollBarOuterWrap');
+
+      if(isScrollbar) return;
+      
+      if(hasParent){
+        if(_this.elem.id !== 'contentScroll'){
+          addClass(_this.scrollBarOuterWrap, "hide");
+          disable = true;
+        }
+        else{
+          disable = false;
+          removeClass(_this.scrollBarOuterWrap, "hide");
+        }
+      }
+      else{
+        if(_this.elem.id !== 'contentScroll'){
+          disable = false;
+          removeClass(_this.scrollBarOuterWrap, "hide");
+        }
+        else{
+          addClass(_this.scrollBarOuterWrap, "hide");
+        }
+      }
+    }
+  })
   // detect that if hovered scroll container
   addEvent(_this.elem, "mouseenter", function() {
     isSelf = true;
