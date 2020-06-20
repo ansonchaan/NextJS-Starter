@@ -19,24 +19,30 @@ const MyApp = ({ Component, pageProps }) => {
     const dispatch = useDispatch();
     const language = useSelector(state => state.language);
     const route = useRouter();
-    const {pathname} = route;
+    const {pathname, basePath} = route;
     
+    const smooth = useRef(null);
     const scrollWrap = useRef(null);
     
 
     useEffect(()=>{
-        const isMatch = pathname.match(/\/\[lang\]\/(\w*)/);
-        setPage(isMatch ? pathname.match(/\/\[lang\]\/(\w*)/)[1] : 'home');
+        const urlArray = pathname.split('/');
+        urlArray.shift();
+        const isMatch = urlArray[basePath ? 2 : 1];
+        setPage(isMatch ? urlArray[basePath ? 2 : 1] + (urlArray[basePath ? 3 : 2] ? 'detail' : '') : 'home');
+
         if(page !== prevPage && page !== null){
             dispatch({type:'UPDATE_PAGE', page:page});
+            if(smooth.current)
+                smooth.current.reset();
         }
     })
 
     useEffect(()=>{
-        let smooth = new SmoothScroll(scrollWrap.current,(s, y, h) => {});
+        smooth.current = new SmoothScroll(scrollWrap.current,(s, y, h) => {});
         return () => { 
-            smooth.off();
-            smooth = null;
+            smooth.current.off();
+            smooth.current = null;
         }
     },[])
 
