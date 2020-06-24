@@ -19,9 +19,20 @@ const About = () => {
     )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps( async ({ store, query }) => {
-    store.dispatch({type:'UPDATE_LANGUAGE', language: query.lang})
+export const getStaticProps = wrapper.getStaticProps( async ({ store, params }) => {
+    store.dispatch({type:'UPDATE_LANGUAGE', language: params.lang})
     store.dispatch({type:'UPDATE_PAGE', page:'about'})
 })
+  
+export const getStaticPaths = async () => {
+    const lang = ['en'];
+
+    const paths = lang.map((v)=>({
+        params: { lang: v }
+    }))
+  
+    return{ paths, fallback: false }
+}
+
 
 export default About;

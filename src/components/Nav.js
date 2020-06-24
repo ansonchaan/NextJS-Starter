@@ -8,7 +8,7 @@ const Nav = () => {
     const route = useRouter();
 
     const onChangeLang = (_lang) => {
-        route.replace(route.pathname, `${route.pathname.replace('[lang]',_lang)}`);
+        // route.replace(route.pathname, `${route.pathname.replace('[lang]',_lang)}`);
         dispatch({type:'UPDATE_LANGUAGE', language: _lang});
     }
 
@@ -18,11 +18,17 @@ const Nav = () => {
             <Link href="/[lang]/about" as={`/${language}/about`}><a>About</a></Link>
             <br/>
             <br/>
-            <div onClick={()=>onChangeLang('en')}>EN</div>
+            <Link href={`/[lang]${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/[section]` : ''}${route.query.detail ? `/[detail]` : ''}` : ''}`} as={`/en${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/${route.query.section}` : ''}${route.query.detail ? `/${route.query.detail}` : ''}` : ''}`}>
+                <a onClick={()=>onChangeLang('en')}>EN</a>
+            </Link>
             <br/>
-            <div onClick={()=>onChangeLang('tc')}>TC</div>
+            <Link href={`/[lang]${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/[section]` : ''}${route.query.detail ? `/[detail]` : ''}` : ''}`} as={`/en${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/${route.query.section}` : ''}${route.query.detail ? `/${route.query.detail}` : ''}` : ''}`}>
+                <a onClick={()=>onChangeLang('tc')}>Tc</a>
+            </Link>
             <br/>
-            <div onClick={()=>onChangeLang('sc')}>SC</div>
+            <Link href={`/[lang]${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/[section]` : ''}${route.query.detail ? `/[detail]` : ''}` : ''}`} as={`/en${page !== 'home' ? `/${page.replace('detail','')}${route.query.section ? `/${route.query.section}` : ''}${route.query.detail ? `/${route.query.detail}` : ''}` : ''}`}>
+                <a onClick={()=>onChangeLang('sc')}>sc</a>
+            </Link>
         </div>
     )
 }

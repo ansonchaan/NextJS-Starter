@@ -27,16 +27,21 @@ const MyApp = ({ Component, pageProps }) => {
 
     useEffect(()=>{
         const urlArray = pathname.split('/');
-        urlArray.shift();
-        const isMatch = urlArray[basePath ? 2 : 1];
-        setPage(isMatch ? urlArray[basePath ? 2 : 1] + (urlArray[basePath ? 3 : 2] ? 'detail' : '') : 'home');
-
+        urlArray.splice(0,1);
+        if('/'+urlArray[0] === basePath){
+            urlArray.splice(0,1);
+        }
+        const isMatch = urlArray[1];
+        setPage(isMatch ? urlArray[1] + (urlArray[2] ? 'detail' : '') : 'home');
+    },[pathname])
+    
+    useEffect(()=>{
         if(page !== prevPage && page !== null){
             dispatch({type:'UPDATE_PAGE', page:page});
             if(smooth.current)
                 smooth.current.reset();
         }
-    })
+    },[page])
 
     useEffect(()=>{
         smooth.current = new SmoothScroll(scrollWrap.current,(s, y, h) => {});

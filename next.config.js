@@ -8,7 +8,7 @@ module.exports = withCSS(withSass({
   distDir: 'build',
   exportTrailingSlash: isProd ? true : false,
   experimental: {
-      basePath: isProd ? '/barwo' : null
+      basePath: isProd ? '/name' : null
   },
   exportPathMap: async function (defaultPathMap,{ dev, dir, outDir, distDir, buildId }) {
       const pathMap = {};
