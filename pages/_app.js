@@ -3,6 +3,7 @@ import { useSelector, useDispatch }  from 'react-redux';
 import { SmoothScroll, usePrevious, adjustFontSize } from '../globalFunc'
 import { wrapper } from '../src/store'
 import { useRouter } from 'next/router';
+import Head from 'next/head'
 
 // Components
 // import Main from './Main'
@@ -19,7 +20,7 @@ const MyApp = ({ Component, pageProps }) => {
     const dispatch = useDispatch();
     const language = useSelector(state => state.language);
     const route = useRouter();
-    const {pathname, basePath} = route;
+    const {asPath, pathname, basePath} = route;
     
     const smooth = useRef(null);
     const scrollWrap = useRef(null);
@@ -31,8 +32,14 @@ const MyApp = ({ Component, pageProps }) => {
         if('/'+urlArray[0] === basePath){
             urlArray.splice(0,1);
         }
-        const isMatch = urlArray[1];
-        setPage(isMatch ? urlArray[1] + (urlArray[2] ? 'detail' : '') : 'home');
+        const isSection = urlArray[2] ? urlArray[2].match(/section/g) : false;
+        let isPost;
+
+        isSection ? 
+            isPost = urlArray[3] ? urlArray[3].match(/post/g) : false
+        :
+            isPost = urlArray[2] ? urlArray[2].match(/post/g) : false
+        setPage(isPost ? urlArray[1]+'-post' : urlArray[1] ? urlArray[1] : 'home');
     },[pathname])
     
     useEffect(()=>{
@@ -58,16 +65,33 @@ const MyApp = ({ Component, pageProps }) => {
             window.removeEventListener('resize', ()=>adjustFontSize());
         }
     },[])
+    
+    const getTitle = () => {
+        const title = asPath.replace(basePath, '').split('/');
+        title.splice(0,2);
+
+        for(let i=0; i<title.length; i++){
+            title[i] = decodeURIComponent(title[i].charAt(0).toUpperCase() + title[i].slice(1));
+        }
+
+        return title.length ? title.reverse().join(' | ') : 'Barwo';
+    }
 
     return (
-        <div id="bodyWrap" className={language}>
-            <div id="mainWrap" className={page}>
-                <div ref={scrollWrap} id="scrollWrap">
-                    <Component {...pageProps} />
+        <>
+            <Head>
+                <title>{getTitle()}</title>
+                <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+            </Head>
+            <div id="bodyWrap" className={language}>
+                <div id="mainWrap" className={page}>
+                    <div ref={scrollWrap} id="scrollWrap">
+                        <Component {...pageProps} />
+                    </div>
                 </div>
+                <Nav/>
             </div>
-            <Nav/>
-        </div>
+        </>
     )
 }
 
