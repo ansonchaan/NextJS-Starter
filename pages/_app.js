@@ -67,7 +67,7 @@ const MyApp = ({ Component, pageProps }) => {
     },[])
     
     const getTitle = () => {
-        const title = asPath.replace(basePath, '').split('/');
+        const title = asPath.replace(basePath, '').replace(/\?.+/g,'').split('/');
         title.splice(0,2);
 
         for(let i=0; i<title.length; i++){
