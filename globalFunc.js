@@ -432,7 +432,7 @@ export const SmoothScroll = function(elem, scrollFunc) {
   var _this = this;
 
   // Grab both red boxes
-  this.elem = document.querySelector(elem);
+  this.elem = elem;
 
   // Check how much we can scroll. This value is the
   // height of the scrollable element minus the height of the widow
@@ -508,6 +508,34 @@ export const SmoothScroll = function(elem, scrollFunc) {
     // lazyLoad.checkAndShowImg();
   };
 
+  addEvent(document, 'mousemove', function(e){
+    if(_this.scrollBarOuterWrap){
+      const hasParent = e.target.closest('#contentScroll');
+      const isScrollbar = e.target.closest('#scrollBarOuterWrap');
+
+      if(isScrollbar) return;
+      
+      if(hasParent){
+        if(_this.elem.id !== 'contentScroll'){
+          addClass(_this.scrollBarOuterWrap, "hide");
+          disable = true;
+        }
+        else{
+          disable = false;
+          removeClass(_this.scrollBarOuterWrap, "hide");
+        }
+      }
+      else{
+        if(_this.elem.id !== 'contentScroll'){
+          disable = false;
+          removeClass(_this.scrollBarOuterWrap, "hide");
+        }
+        else{
+          addClass(_this.scrollBarOuterWrap, "hide");
+        }
+      }
+    }
+  })
   // detect that if hovered scroll container
   addEvent(_this.elem, "mouseenter", function() {
     isSelf = true;
@@ -611,20 +639,23 @@ export const SmoothScroll = function(elem, scrollFunc) {
     targetY = y;
   };
 
+  const vs = VirtualScroll();
+  const fi = FrameImpulse();
   var isOn = false;
   var on = function() {
     isOn = true;
     refresh();
     onResize();
+    initScrollBar();
     onShowScrollBar();
-    VirtualScroll().on(onScroll);
-    FrameImpulse().on(onAnim);
+    vs.on(onScroll);
+    fi.on(onAnim);
   };
 
   var off = function() {
     isOn = false;
-    VirtualScroll().off(onScroll);
-    FrameImpulse().off(onAnim);
+    vs.off(onScroll);
+    fi.off(onAnim);
     onHideScrollBar();
     destroy();
   };
@@ -645,13 +676,11 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
     if(isMobile()) {
       if(isOn) {
-        console.log('off');
         off();
         setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
       }
     } else {
       if(!isOn) {
-        console.log('on');
         initScrollBar();
         on();
       }
@@ -676,7 +705,6 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
   var init = function() {
     if(!isMobile()){
-      initScrollBar();
       on();
     }
     addEvent(window, "resize", onResize);
