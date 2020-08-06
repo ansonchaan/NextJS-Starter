@@ -531,6 +531,7 @@ export const SmoothScroll = function(elem, scrollFunc) {
           removeClass(_this.scrollBarOuterWrap, "hide");
         }
         else{
+          disable = true;
           addClass(_this.scrollBarOuterWrap, "hide");
         }
       }
