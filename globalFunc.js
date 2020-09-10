@@ -13,7 +13,7 @@ export const print = (state, color, text) =>{
 //
 // enlarge font size on large screen
 //
-export const adjustFontSize = (baseFontRatio = 18 / 1200, fontMultiplier = 0.84375) => {
+export const adjustFontSize = (baseFontRatio = 16 / 1440, fontMultiplier = 0.84375) => {
   const width = window.innerWidth;
   const roundedNumber = Math.round(
     baseFontRatio * width * fontMultiplier
@@ -454,7 +454,7 @@ export const SmoothScroll = function(elem, scrollFunc) {
   var showScrollBar = false;
 
   var disable = false;
-  var isSelf = false;
+  var isSelf = true;
 
   var onScroll = function(e) {
     if (!disable && isSelf) {
