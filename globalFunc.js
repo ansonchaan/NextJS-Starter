@@ -428,7 +428,7 @@ var VirtualScroll = function(){
 //
 //  Virtual Scroll
 //
-export const SmoothScroll = function(elem, scrollFunc) {
+export const SmoothScroll = function (elem, scrollFunc) {
   var _this = this;
 
   // Grab both red boxes
@@ -437,7 +437,9 @@ export const SmoothScroll = function(elem, scrollFunc) {
   // Check how much we can scroll. This value is the
   // height of the scrollable element minus the height of the widow
   var fullElemHeight = this.elem.getBoundingClientRect().height;
-  var parentHeight = this.elem.parentNode.offsetHeight;
+  var parent = this.elem.parentNode;
+  var parentWidth = parent.offsetWidth;
+  var parentHeight = parent.offsetHeight;
   var elemWidth;// = this.elem.getBoundingClientRect().width - this.elem.;
   var elemHeight;// = this.elem.getBoundingClientRect().height - window.innerHeight;
 
@@ -447,17 +449,17 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
   // Store current scroll position
   var targetX = 0,
-      targetY = 0;
+    targetY = 0;
   var currentX = 0,
-      currentY = 0;
+    currentY = 0;
 
   var showScrollBar = false;
 
   var disable = false;
-  var isSelf = true;
+  var isSelf = false;
 
-  var onScroll = function(e) {
-    if (!disable && isSelf) {
+  var onScroll = function (e) {
+    if (isSelf) {
       // Accumulate delta value on each scroll event
       targetY += e.deltaY * mult;
       targetX += e.deltaX * mult;
@@ -471,87 +473,74 @@ export const SmoothScroll = function(elem, scrollFunc) {
     }
   };
 
-  var onAnim = function() {
-    // Make sure this works across different browsers (use the shim or something)
+  var onAnim = function () {
 
     // keep at bottom while resizing
     if (-targetX > elemWidth && targetX < 0) targetX = -elemWidth + 1;
     if (-targetY > elemHeight && targetY < 0) targetY = -elemHeight + 1;
-    if(_this.elem.getBoundingClientRect().height < _this.elem.parentNode.offsetHeight)
+    if (_this.elem.getBoundingClientRect().height <= parentHeight) {
       targetY = 0;
+    } else {
+      // Get closer to the target value at each frame, using ease.
+      // Other easing methods are also ok.
+      currentX += (targetX - currentX) * ease;
+      currentY += (targetY - currentY) * ease;
 
-    // Get closer to the target value at each frame, using ease.
-    // Other easing methods are also ok.
-    currentX += (targetX - currentX) * ease;
-    currentY += (targetY - currentY) * ease;
+
+      // Uncomment this line to scroll horizontally
+      // currentX += (targetX - currentX) * ease;
+
+      // Apply CSS style
+      setTranslate(
+        _this.elem,
+        currentX.toFixed(4) + "px",
+        currentY.toFixed(4) + "px",
+        0 + "px"
+      );
+
+      refresh();
+
+      if (scrollFunc) scrollFunc(currentY / elemHeight, currentY, elemHeight);
 
 
-    // Uncomment this line to scroll horizontally
-    // currentX += (targetX - currentX) * ease;
-
-    // Apply CSS style
-    setTranslate(
-      _this.elem,
-      currentX.toFixed(4) + "px",
-      currentY.toFixed(4) + "px",
-      0 + "px"
-    );
-
-    refresh();
-
-    if (scrollFunc) scrollFunc(currentY / elemHeight, currentY, elemHeight);
-
-    if (showScrollBar)
-      if (fullElemHeight > _this.elem.parentNode.offsetHeight)
-        rePositionScrollBar(currentY);
-
+      if (showScrollBar)
+        if (fullElemHeight > parentHeight)
+          rePositionScrollBar(currentY);
+    }
     // lazyLoad.checkAndShowImg();
   };
 
-  addEvent(document, 'mousemove', function(e){
-    if(_this.scrollBarOuterWrap){
-      const hasParent = e.target.closest('#contentScroll');
+
+  addEvent(document, 'mousemove', function (e) {
+    if (_this.scrollBarOuterWrap) {
+      const mainScrollElem = e.target.closest('#scrollWrap');
+      const childScrollElem = e.target.closest('#childScroll');
       const isScrollbar = e.target.closest('#scrollBarOuterWrap');
 
-      if(isScrollbar) return;
-      
-      if(hasParent){
-        if(_this.elem.id !== 'contentScroll'){
-          addClass(_this.scrollBarOuterWrap, "hide");
-          disable = true;
-        }
-        else{
-          disable = false;
+      if (isScrollbar) return;
+      if (e.target.closest('.disable')) return;
+
+      addClass(_this.scrollBarOuterWrap, "hide");
+      isSelf = false;
+
+      if (childScrollElem) {
+        if (_this.elem === childScrollElem) {
+          // console.log('in child')
+          isSelf = true;
           removeClass(_this.scrollBarOuterWrap, "hide");
         }
       }
-      else{
-        if(_this.elem.id !== 'contentScroll'){
-          disable = false;
+      else {
+        if (_this.elem === mainScrollElem) {
+          // console.log('in parent')
+          isSelf = true;
           removeClass(_this.scrollBarOuterWrap, "hide");
-        }
-        else{
-          disable = true;
-          addClass(_this.scrollBarOuterWrap, "hide");
         }
       }
     }
   })
-  // detect that if hovered scroll container
-  addEvent(_this.elem, "mouseenter", function() {
-    isSelf = true;
-  });
-  addEvent(_this.elem, "mouseleave", function() {
-    isSelf = false;
-  });
-  addEvent(_this.elem, "touchstart", function() {
-    isSelf = true;
-  });
-  addEvent(_this.elem, "touchend", function() {
-    isSelf = false;
-  });
 
-  var initScrollBar = function() {
+  var initScrollBar = function () {
     _this.oldMouseY = 0;
     _this.scrollBarOuterWrap = document.createElement("div");
     _this.scrollBarWrap = document.createElement("div");
@@ -565,31 +554,35 @@ export const SmoothScroll = function(elem, scrollFunc) {
 
     _this.scrollBarWrap.appendChild(_this.scrollBar);
     _this.scrollBarOuterWrap.appendChild(_this.scrollBarWrap);
-    _this.elem.parentNode.appendChild(_this.scrollBarOuterWrap);
+    parent.appendChild(_this.scrollBarOuterWrap);
+
+    if (_this.elem.id === 'childScroll') {
+      addClass(_this.scrollBarOuterWrap, 'hide');
+    }
   };
 
-  var rePositionScrollBar = function(y) {
+  var rePositionScrollBar = function (y) {
     var scrollBarHeight = (1 - elemHeight / fullElemHeight) * 100;
     _this.scrollBar.style.height = scrollBarHeight + "%";
     _this.scrollBarY = (_this.scrollBarWrap.offsetHeight - _this.scrollBar.offsetHeight) * (y / elemHeight);
 
-    setTranslate( _this.scrollBar, '-50%', -_this.scrollBarY.toFixed(4) + "px", 0 + "px");
+    setTranslate(_this.scrollBar, '-50%', -_this.scrollBarY.toFixed(4) + "px", 0 + "px");
   };
 
-  var onMouseDownScrollBar = function(e) {
+  var onMouseDownScrollBar = function (e) {
     e.preventDefault();
     _this.oldMouseY = e.pageY;
     _this.clickedScrollBar = true;
     addClass(this, "active");
-    
+
     addEvent(document, "mousemove", onMoveScrollBar);
     addEvent(document, "mouseup", onMouseUpScrollBar);
   };
 
-  var onMoveScrollBar = function(e) {
+  var onMoveScrollBar = function (e) {
     if (_this.clickedScrollBar) {
       var y = _this.oldMouseY - e.pageY;
-      targetY += y * (fullElemHeight / _this.elem.parentNode.offsetHeight);
+      targetY += y * (fullElemHeight / parentHeight);
 
       targetY = Math.max(-elemHeight, targetY);
       targetY = Math.min(0, targetY);
@@ -598,44 +591,32 @@ export const SmoothScroll = function(elem, scrollFunc) {
     }
   };
 
-  var onMouseUpScrollBar = function() {
+  var onMouseUpScrollBar = function () {
     _this.clickedScrollBar = false;
     removeClass(_this.scrollBar, "active");
-    
+
     removeEvent(document, "mousemove", onMoveScrollBar);
     removeEvent(document, "mouseup", onMouseUpScrollBar);
   };
 
-  var reset = function() {
+  var reset = function () {
     currentY = 0;
     targetY = 0;
   };
 
-  var refresh = function() {
-    if (_this.elem.parentNode != null) {
+  var refresh = function () {
+    if (parent != null) {
       fullElemHeight = _this.elem.getBoundingClientRect().height;
-      elemWidth = _this.elem.getBoundingClientRect().width - _this.elem.parentNode.offsetWidth;
-      elemHeight = _this.elem.getBoundingClientRect().height - _this.elem.parentNode.offsetHeight;
-
-      if (showScrollBar) {
-        if (fullElemHeight > parentHeight) {
-          if (hasClass(_this.scrollBarOuterWrap, "hide"))
-            removeClass(_this.scrollBarOuterWrap, "hide");
-        } else {
-          if (!hasClass(_this.scrollBarOuterWrap, "hide"))
-            addClass(_this.scrollBarOuterWrap, "hide");
-        }
-      }
+      elemWidth = _this.elem.getBoundingClientRect().width - parentWidth;
+      elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
     }
   };
 
-  var to = function(y) {
-    elemHeight =
-      _this.elem.getBoundingClientRect().height -
-      _this.elem.parentNode.offsetHeight;
+  var to = function (y) {
+    elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
     targetY = Math.max(-elemHeight, y);
   };
-  var set = function(y) {
+  var set = function (y) {
     currentY = y;
     targetY = y;
   };
@@ -643,7 +624,7 @@ export const SmoothScroll = function(elem, scrollFunc) {
   const vs = VirtualScroll();
   const fi = FrameImpulse();
   var isOn = false;
-  var on = function() {
+  var on = function () {
     isOn = true;
     refresh();
     onResize();
@@ -653,17 +634,16 @@ export const SmoothScroll = function(elem, scrollFunc) {
     fi.on(onAnim);
   };
 
-  var off = function() {
+  var off = function () {
     isOn = false;
     vs.off(onScroll);
     fi.off(onAnim);
     onHideScrollBar();
     destroy();
   };
-  
-  var destroy = function(){
-    // removeEvent(window, "resize", onResize);
-    if(_this.scrollBarOuterWrap){
+
+  var destroy = function () {
+    if (_this.scrollBarOuterWrap) {
       removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
       _this.scrollBarOuterWrap.remove();
       _this.scrollBarOuterWrap = null;
@@ -672,40 +652,48 @@ export const SmoothScroll = function(elem, scrollFunc) {
     }
   }
 
-  var onResize = function() {
-    parentHeight = _this.elem.parentNode.offsetHeight;
+  var onResize = function () {
+    parentHeight = parent.offsetHeight;
 
-    if(isMobile()) {
-      if(isOn) {
+    if (_this.elem.getBoundingClientRect().height <= parentHeight) {
+      if (!hasClass(_this.elem, 'disable'))
+        addClass(_this.elem, 'disable');
+    }
+    else {
+      if (hasClass(_this.elem, 'disable'))
+        removeClass(_this.elem, 'disable');
+    }
+
+    if (isMobile()) {
+      if (isOn) {
         off();
         setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
       }
     } else {
-      if(!isOn) {
-        initScrollBar();
+      if (!isOn) {
         on();
       }
-      if(disable) onEnable();
+      if (disable) onEnable();
     }
   };
-  var onDisable = function() {
+  var onDisable = function () {
     disable = true;
   };
-  var onEnable = function() {
+  var onEnable = function () {
     disable = false;
   };
 
-  var onShowScrollBar = function() {
+  var onShowScrollBar = function () {
     showScrollBar = true;
-    removeClass(_this.scrollBarWrap,'hide');
+    // removeClass(_this.scrollBarOuterWrap,'hide');
   };
-  var onHideScrollBar = function() {
+  var onHideScrollBar = function () {
     showScrollBar = false;
-    if(_this.scrollBarWrap) addClass(_this.scrollBarWrap,'hide');
+    if (_this.scrollBarOuterWrap) addClass(_this.scrollBarOuterWrap, 'hide');
   };
 
-  var init = function() {
-    if(!isMobile()){
+  var init = function () {
+    if (!isMobile()) {
       on();
     }
     addEvent(window, "resize", onResize);
