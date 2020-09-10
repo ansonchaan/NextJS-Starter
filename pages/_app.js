@@ -23,7 +23,7 @@ const MyApp = ({ Component, pageProps }) => {
     const {asPath, pathname, basePath} = route;
     
     const smooth = useRef(null);
-    const scrollWrap = useRef(null);
+    const mainScroll = useRef(null);
     
 
     useEffect(()=>{
@@ -51,7 +51,7 @@ const MyApp = ({ Component, pageProps }) => {
     },[page])
 
     useEffect(()=>{
-        smooth.current = new SmoothScroll(scrollWrap.current,(s, y, h) => {});
+        smooth.current = new SmoothScroll(mainScroll.current,(s, y, h) => {});
         return () => { 
             smooth.current.off();
             smooth.current = null;
@@ -85,7 +85,7 @@ const MyApp = ({ Component, pageProps }) => {
             </Head>
             <div id="bodyWrap" className={language}>
                 <div id="mainWrap" className={page}>
-                    <div ref={scrollWrap} id="scrollWrap">
+                    <div ref={mainScroll} id="mainScroll">
                         <Component {...pageProps} />
                     </div>
                 </div>

@@ -513,7 +513,7 @@ export const SmoothScroll = function (elem, scrollFunc) {
 
   addEvent(document, 'mousemove', function (e) {
     if (_this.scrollBarOuterWrap) {
-      const mainScrollElem = e.target.closest('#scrollWrap');
+      const mainScrollElem = e.target.closest('#mainScroll');
       const childScrollElem = e.target.closest('#childScroll');
       const isScrollbar = e.target.closest('#scrollBarOuterWrap');
 
