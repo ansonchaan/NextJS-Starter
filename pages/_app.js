@@ -1,9 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
-import { useSelector, useDispatch }  from 'react-redux';
-import { SmoothScroll, usePrevious, adjustFontSize } from '../globalFunc'
+import { useSelector, useDispatch }  from 'react-redux'
+import { usePrevious, adjustFontSize } from '../globalFunc'
+// import LocomotiveScroll from 'locomotive-scroll'
+import { AnimatePresence } from 'framer-motion'
 import { wrapper } from '../src/store'
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
+
 
 // Components
 // import Main from './Main'
@@ -13,17 +17,17 @@ import Nav from '../src/components/Nav'
 import '../scss/style.scss';
 
 
-const MyApp = ({ Component, pageProps }) => {
+const MyApp = ({ Component, pageProps, router }) => {
     const [page, setPage] = useState(null);
 
     const prevPage = usePrevious(page);
     const dispatch = useDispatch();
     const language = useSelector(state => state.language);
-    const route = useRouter();
-    const {asPath, pathname, basePath} = route;
-    
-    const smooth = useRef(null);
-    const mainScroll = useRef(null);
+    // const route = useRouter();
+    const {asPath, pathname, basePath, route} = router;
+    // console.log(route)
+    // const smooth = useRef(null);
+    // const scrollWrap = useRef(null);
     
 
     useEffect(()=>{
@@ -45,18 +49,12 @@ const MyApp = ({ Component, pageProps }) => {
     useEffect(()=>{
         if(page !== prevPage && page !== null){
             dispatch({type:'UPDATE_PAGE', page:page});
-            if(smooth.current)
-                smooth.current.reset();
+            // if(scroll.current){
+            //     scroll.current.destroy();
+            //     scroll.current.init();
+            // }
         }
     },[page])
-
-    useEffect(()=>{
-        smooth.current = new SmoothScroll(mainScroll.current,(s, y, h) => {});
-        return () => { 
-            smooth.current.off();
-            smooth.current = null;
-        }
-    },[])
 
     useEffect(()=>{
         adjustFontSize();
@@ -83,13 +81,11 @@ const MyApp = ({ Component, pageProps }) => {
                 <title>{getTitle()}</title>
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
             </Head>
-            <div id="bodyWrap" className={language}>
-                <div id="mainWrap" className={page}>
-                    <div ref={mainScroll} id="mainScroll">
-                        <Component {...pageProps} />
-                    </div>
-                </div>
+            <div id="bodyWrap" className={`${language} ${page}`}>
                 <Nav/>
+                <AnimatePresence initial={false} exitBeforeEnter>
+                    <Component {...pageProps} key={route}/>
+                </AnimatePresence>
             </div>
         </>
     )

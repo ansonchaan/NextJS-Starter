@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { wrapper } from '../../src/store'
 import { useRouter } from 'next/router';
+import { motion } from 'framer-motion'
 
 const About = () => {
     const language = useSelector(state => state.language);
     // const dispatch = useDispatch();
-    // const route = useRouter();
+    const route = useRouter();
   
     useEffect(()=>{
         // console.log(route)
@@ -14,7 +15,9 @@ const About = () => {
 
     return (
         <div id="about">
-            about {language}
+            <motion.span initial={{scale:0}} animate={{scale:1}} exit={{scale:0}}>
+                about {language}
+            </motion.span>
         </div>
     )
 }

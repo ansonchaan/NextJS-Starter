@@ -62,660 +62,768 @@ const isMobile = function() {
   return window.innerWidth <= 1024;
 };
 
-const hasClass = function(el, className) {
-  if (el.classList) return el.classList.contains(className);
-  else
-    return !!el.className.match(new RegExp("(\\s|^)" + className + "(\\s|$)"));
-};
+// const hasClass = function(el, className) {
+//   if (el.classList) return el.classList.contains(className);
+//   else
+//     return !!el.className.match(new RegExp("(\\s|^)" + className + "(\\s|$)"));
+// };
 
-const addClass = function(el, className) {
-  if (el.classList) el.classList.add(className);
-  else if (!hasClass(el, className)) el.className += " " + className;
-};
+// const addClass = function(el, className) {
+//   if (el.classList) el.classList.add(className);
+//   else if (!hasClass(el, className)) el.className += " " + className;
+// };
 
-const removeClass = function(el, className) {
-  const isNodelist =
-    typeof el.length != "undefined" && typeof el.item != "undefined";
-  if (isNodelist) {
-    const els = el;
+// const removeClass = function(el, className) {
+//   const isNodelist =
+//     typeof el.length != "undefined" && typeof el.item != "undefined";
+//   if (isNodelist) {
+//     const els = el;
 
-    for (let i = 0; els[i]; i++) {
-      if (els[i].classList) els[i].classList.remove(className);
-      else if (hasClass(els[i], className)) {
-        let reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
-        els[i].className = els[i].className.replace(reg, " ");
-      }
-    }
-  } else {
-    if (el.classList) el.classList.remove(className);
-    else if (hasClass(el, className)) {
-      let reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
-      el.className = el.className.replace(reg, " ");
-    }
-  }
-};
+//     for (let i = 0; els[i]; i++) {
+//       if (els[i].classList) els[i].classList.remove(className);
+//       else if (hasClass(els[i], className)) {
+//         let reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
+//         els[i].className = els[i].className.replace(reg, " ");
+//       }
+//     }
+//   } else {
+//     if (el.classList) el.classList.remove(className);
+//     else if (hasClass(el, className)) {
+//       let reg = new RegExp("(\\s|^)" + className + "(\\s|$)");
+//       el.className = el.className.replace(reg, " ");
+//     }
+//   }
+// };
 
-//
-// Add and Remove Event
-//
-const addEvent = function(obj, type, callback) {
-  if (obj === null || typeof obj === "undefined") return;
+// //
+// // Add and Remove Event
+// //
+// const addEvent = function(obj, type, callback) {
+//   if (obj === null || typeof obj === "undefined") return;
 
-  if (obj.addEventListener) obj.addEventListener(type, callback, false);
-  else if (obj.attachEvent) obj.attachEvent("on" + type, callback);
-  else obj["on" + type] = callback;
-};
-const removeEvent = function(obj, type, func) {
-  if (obj.removeEventListener) obj.removeEventListener(type, func, false);
-};
+//   if (obj.addEventListener) obj.addEventListener(type, callback, false);
+//   else if (obj.attachEvent) obj.attachEvent("on" + type, callback);
+//   else obj["on" + type] = callback;
+// };
+// const removeEvent = function(obj, type, func) {
+//   if (obj.removeEventListener) obj.removeEventListener(type, func, false);
+// };
 
-const setTranslate = function(elem, x, y, z) {
-  elem.style.webkitTransform = "translate3d(" + x + "," + y + "," + z + ")";
-  elem.style.msTransform = "translate3d(" + x + "," + y + "," + z + ")";
-  elem.style.transform = "translate3d(" + x + "," + y + "," + z + ")";
-};
-
-
-
-const FrameImpulse = function(){
-  var vendors = ["webkit", "moz"];
-
-  var r = {};
-  var listeners = [],
-    numListeners = 0,
-    toRemove = [],
-    numToRemove;
-  var lastTime = 0;
-
-  for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
-    window.requestAnimationFrame = window[vendors[i] + "RequestAnimationFrame"];
-  }
-
-  if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = function(callback) {
-      var currTime = new Date().getTime();
-      var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function() {
-        callback(currTime + timeToCall);
-      }, timeToCall);
-      lastTime = currTime + timeToCall;
-      return id;
-    };
-  }
-
-  var run = function(deltaTime) {
-    requestAnimationFrame(run);
-
-    if (numListeners === 0) return;
-
-    for (var i = 0; i < numListeners; i++) {
-      listeners[i].call(deltaTime);
-    }
-
-    if (numToRemove > 0) {
-      var indexToRemove = [];
-      for (let i = listeners.length - 1; i >= 0; i--) {
-        for (var j = 0; j < toRemove.length; j++) {
-          if (listeners[i] === toRemove[j]) indexToRemove.push(i);
-        }
-      }
-
-      for (let i = 0; i < indexToRemove.length; i++) {
-        listeners.splice(indexToRemove[i], 1);
-      }
-
-      numListeners = listeners.length;
-      toRemove = [];
-      numToRemove = 0;
-    }
-  };
-
-  r.on = function(f) {
-    document.body.scrollTo(0, 0);
-    if (listeners.indexOf(f) > -1) {
-      return;
-    }
-    listeners.push(f);
-    numListeners = listeners.length;
-    // console.log("FrameImpulse > new listener > total :", numListeners);
-  };
-
-  r.off = function(f) {
-    //toRemove.push(f);
-    //numToRemove = toRemove.length;
-    var i = listeners.indexOf(f);
-    if (i === -1) return;
-    listeners.splice(i, 1);
-    numListeners = listeners.length;
-    // console.log("FrameImpulse > scheduled removal > total :", numListeners);
-  };
-
-  r.getListeners = function() {
-    return listeners;
-  };
-
-  run();
-  return r;
-};
+// const setTranslate = function(elem, x, y, z) {
+//   elem.style.webkitTransform = "translate3d(" + x + "," + y + "," + z + ")";
+//   elem.style.msTransform = "translate3d(" + x + "," + y + "," + z + ")";
+//   elem.style.transform = "translate3d(" + x + "," + y + "," + z + ")";
+// };
 
 
-var VirtualScroll = function(){
-  var vs = {};
 
-  var numListeners,
-    listeners = [],
-    initialized = false;
+// const FrameImpulse = function(){
+//   var vendors = ["webkit", "moz"];
 
-  var touchStartX, touchStartY;
+//   var r = {};
+//   var listeners = [],
+//     numListeners = 0,
+//     toRemove = [],
+//     numToRemove;
+//   var lastTime = 0;
 
-  // [ These settings can be customized with the options() function below ]
-  // Mutiply the touch action by two making the scroll a bit faster than finger movement
-  var touchMult = 2;
-  // Firefox on Windows needs a boost, since scrolling is very slow
-  var firefoxMult = 15;
-  // How many pixels to move with each key press
-  var keyStep = 120;
-  // General multiplier for all mousehweel including FF
-  var mouseMult = 1;
+//   for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
+//     window.requestAnimationFrame = window[vendors[i] + "RequestAnimationFrame"];
+//   }
 
-  var bodyTouchAction;
+//   if (!window.requestAnimationFrame) {
+//     window.requestAnimationFrame = function(callback) {
+//       var currTime = new Date().getTime();
+//       var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+//       var id = window.setTimeout(function() {
+//         callback(currTime + timeToCall);
+//       }, timeToCall);
+//       lastTime = currTime + timeToCall;
+//       return id;
+//     };
+//   }
 
-  var hasWheelEvent = "onwheel" in document;
-  var hasMouseWheelEvent = "onmousewheel" in document;
-  var hasTouch = "ontouchstart" in document;
-  var hasKeyDown = "onkeydown" in document;
+//   var run = function(deltaTime) {
+//     requestAnimationFrame(run);
 
-  var hasTouchWin =
-    navigator.msMaxTouchPoints && navigator.msMaxTouchPoints > 1;
-  var hasPointer = !!window.navigator.msPointerEnabled;
+//     if (numListeners === 0) return;
 
-  var isFirefox = navigator.userAgent.indexOf("Firefox") > -1;
+//     for (var i = 0; i < numListeners; i++) {
+//       listeners[i].call(deltaTime);
+//     }
 
-  var event = {
-    y: 0,
-    x: 0,
-    deltaX: 0,
-    deltaY: 0,
-    originalEvent: null
-  };
+//     if (numToRemove > 0) {
+//       var indexToRemove = [];
+//       for (let i = listeners.length - 1; i >= 0; i--) {
+//         for (var j = 0; j < toRemove.length; j++) {
+//           if (listeners[i] === toRemove[j]) indexToRemove.push(i);
+//         }
+//       }
 
-  var k = {
-    left: 37,
-    right: 39,
-    up: 38,
-    down: 40
-  };
+//       for (let i = 0; i < indexToRemove.length; i++) {
+//         listeners.splice(indexToRemove[i], 1);
+//       }
 
-  vs.on = function(f) {
-    if (!initialized) initListeners();
+//       numListeners = listeners.length;
+//       toRemove = [];
+//       numToRemove = 0;
+//     }
+//   };
 
-    var i = listeners.indexOf(f);
-    if (i !== -1) return;
+//   r.on = function(f) {
+//     document.body.scrollTo(0, 0);
+//     if (listeners.indexOf(f) > -1) {
+//       return;
+//     }
+//     listeners.push(f);
+//     numListeners = listeners.length;
+//     // console.log("FrameImpulse > new listener > total :", numListeners);
+//   };
 
-    listeners.push(f);
-    numListeners = listeners.length;
-  };
+//   r.off = function(f) {
+//     //toRemove.push(f);
+//     //numToRemove = toRemove.length;
+//     var i = listeners.indexOf(f);
+//     if (i === -1) return;
+//     listeners.splice(i, 1);
+//     numListeners = listeners.length;
+//     // console.log("FrameImpulse > scheduled removal > total :", numListeners);
+//   };
 
-  /**
-   *	@method options
-   *	@memberof VirtualScroll
-   *	@static
-   *
-   *	@param {Object} opt - object literal containing one or more options from the list above, specified as properties.
-   *
-   *	@description Sets custom parameters to the VirtualScroll (globally). The following options are supported:
-   *
-   *	<ul>
-   *	<li>touchMult (default: 2) - mutiply the touch action to make the scroll a faster/slower than finger movement</li>
-   *	<li>firefoxMult (defailt: 15)- Firefox on Windows needs a boost, since scrolling is very slow</li>
-   *	<li>keyStep (default: 120) - specified how many pixels to move with each key press</li>
-   *	<li>mouseMult (default: 1) - general multiplier for all mousehweel events including FF</li>
-   *	</ul>
-   */
-  vs.options = function(opt) {
-    keyStep = opt.keyStep || 120;
-    firefoxMult = opt.firefoxMult || 15;
-    touchMult = opt.touchMult || 2;
-    mouseMult = opt.mouseMult || 1;
-  };
+//   r.getListeners = function() {
+//     return listeners;
+//   };
 
-  vs.off = function(f) {
-    var i = listeners.indexOf(f);
-    if (i === -1) return;
+//   run();
+//   return r;
+// };
 
-    listeners.splice(i, 1);
-    numListeners = listeners.length;
-    if (numListeners <= 0) destroyListeners();
-  };
 
-  /**
-   *	@method lockTouch
-   *	@memberof VirtualScroll
-   *	@static
-   *
-   *	@description For VirtualScroll to work on mobile, the default swipe-to-scroll behavior needs to be turned off.
-   *	This function will take care of that, however it's a failt simple mechanism - see in the source code, linked below.
-   */
-  vs.lockTouch = function() {
-    document.addEventListener("touchmove", function(e) {
-      e.preventDefault();
-    });
-  };
+// var VirtualScroll = function(){
+//   var vs = {};
 
-  var notify = function(e) {
-    event.x += event.deltaX;
-    event.y += event.deltaY;
-    event.originalEvent = e;
+//   var numListeners,
+//     listeners = [],
+//     initialized = false;
 
-    for (var i = 0; i < numListeners; i++) {
-      listeners[i](event);
-    }
-  };
+//   var touchStartX, touchStartY;
 
-  var onWheel = function(e) {
-    // In Chrome and in Firefox (at least the new one)
-    event.deltaX = (e.wheelDeltaX || e.deltaX) || (e.wheelDeltaY || e.deltaY) * -1;
-    event.deltaY = e.wheelDeltaY || e.deltaY * -1;
+//   // [ These settings can be customized with the options() function below ]
+//   // Mutiply the touch action by two making the scroll a bit faster than finger movement
+//   var touchMult = 2;
+//   // Firefox on Windows needs a boost, since scrolling is very slow
+//   var firefoxMult = 15;
+//   // How many pixels to move with each key press
+//   var keyStep = 120;
+//   // General multiplier for all mousehweel including FF
+//   var mouseMult = 1;
 
-    // for our purpose deltamode = 1 means user is on a wheel mouse, not touch pad
-    // real meaning: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent#Delta_modes
-    if (isFirefox && e.deltaMode === 1) {
-      event.deltaX *= firefoxMult;
-      event.deltaY *= firefoxMult;
-    }
+//   var bodyTouchAction;
 
-    event.deltaX *= mouseMult;
-    event.deltaY *= mouseMult;
+//   var hasWheelEvent = "onwheel" in document;
+//   var hasMouseWheelEvent = "onmousewheel" in document;
+//   var hasTouch = "ontouchstart" in document;
+//   var hasKeyDown = "onkeydown" in document;
 
-    notify(e);
-  };
+//   var hasTouchWin =
+//     navigator.msMaxTouchPoints && navigator.msMaxTouchPoints > 1;
+//   var hasPointer = !!window.navigator.msPointerEnabled;
 
-  var onMouseWheel = function(e) {
-    // In Safari, IE and in Chrome if 'wheel' isn't defined
-    event.deltaX = e.wheelDeltaX ? e.wheelDeltaX : 0;
-    event.deltaY = e.wheelDeltaY ? e.wheelDeltaY : e.wheelDelta;
+//   var isFirefox = navigator.userAgent.indexOf("Firefox") > -1;
 
-    notify(e);
-  };
+//   var event = {
+//     y: 0,
+//     x: 0,
+//     deltaX: 0,
+//     deltaY: 0,
+//     originalEvent: null
+//   };
 
-  var onTouchStart = function(e) {
-    var t = e.targetTouches ? e.targetTouches[0] : e;
-    touchStartX = t.pageX;
-    touchStartY = t.pageY;
-  };
+//   var k = {
+//     left: 37,
+//     right: 39,
+//     up: 38,
+//     down: 40
+//   };
 
-  var onTouchMove = function(e) {
-    // e.preventDefault(); // < This needs to be managed externally
-    var t = e.targetTouches ? e.targetTouches[0] : e;
+//   vs.on = function(f) {
+//     if (!initialized) initListeners();
 
-    event.deltaX = (t.pageX - touchStartX) * touchMult;
-    event.deltaY = (t.pageY - touchStartY) * touchMult;
+//     var i = listeners.indexOf(f);
+//     if (i !== -1) return;
 
-    touchStartX = t.pageX;
-    touchStartY = t.pageY;
+//     listeners.push(f);
+//     numListeners = listeners.length;
+//   };
 
-    notify(e);
-  };
+//   /**
+//    *	@method options
+//    *	@memberof VirtualScroll
+//    *	@static
+//    *
+//    *	@param {Object} opt - object literal containing one or more options from the list above, specified as properties.
+//    *
+//    *	@description Sets custom parameters to the VirtualScroll (globally). The following options are supported:
+//    *
+//    *	<ul>
+//    *	<li>touchMult (default: 2) - mutiply the touch action to make the scroll a faster/slower than finger movement</li>
+//    *	<li>firefoxMult (defailt: 15)- Firefox on Windows needs a boost, since scrolling is very slow</li>
+//    *	<li>keyStep (default: 120) - specified how many pixels to move with each key press</li>
+//    *	<li>mouseMult (default: 1) - general multiplier for all mousehweel events including FF</li>
+//    *	</ul>
+//    */
+//   vs.options = function(opt) {
+//     keyStep = opt.keyStep || 120;
+//     firefoxMult = opt.firefoxMult || 15;
+//     touchMult = opt.touchMult || 2;
+//     mouseMult = opt.mouseMult || 1;
+//   };
 
-  var onKeyDown = function(e) {
-    // 37 left arrow, 38 up arrow, 39 right arrow, 40 down arrow
-    event.deltaX = event.deltaY = 0;
-    switch (e.keyCode) {
-      case k.left:
-        event.deltaX = -keyStep;
-        break;
-      case k.right:
-        event.deltaX = keyStep;
-        break;
-      case k.up:
-        event.deltaY = keyStep;
-        break;
-      case k.down:
-        event.deltaY = -keyStep;
-        break;
-    }
+//   vs.off = function(f) {
+//     var i = listeners.indexOf(f);
+//     if (i === -1) return;
 
-    notify(e);
-  };
+//     listeners.splice(i, 1);
+//     numListeners = listeners.length;
+//     if (numListeners <= 0) destroyListeners();
+//   };
 
-  var initListeners = function() {
-    if (hasWheelEvent) document.addEventListener("wheel", onWheel);
-    if (hasMouseWheelEvent)
-      document.addEventListener("mousewheel", onMouseWheel);
+//   /**
+//    *	@method lockTouch
+//    *	@memberof VirtualScroll
+//    *	@static
+//    *
+//    *	@description For VirtualScroll to work on mobile, the default swipe-to-scroll behavior needs to be turned off.
+//    *	This function will take care of that, however it's a failt simple mechanism - see in the source code, linked below.
+//    */
+//   vs.lockTouch = function() {
+//     document.addEventListener("touchmove", function(e) {
+//       e.preventDefault();
+//     });
+//   };
+
+//   var notify = function(e) {
+//     event.x += event.deltaX;
+//     event.y += event.deltaY;
+//     event.originalEvent = e;
+
+//     for (var i = 0; i < numListeners; i++) {
+//       listeners[i](event);
+//     }
+//   };
+
+//   var onWheel = function(e) {
+//     // In Chrome and in Firefox (at least the new one)
+//     event.deltaX = (e.wheelDeltaX || e.deltaX) || (e.wheelDeltaY || e.deltaY) * -1;
+//     event.deltaY = e.wheelDeltaY || e.deltaY * -1;
+
+//     // for our purpose deltamode = 1 means user is on a wheel mouse, not touch pad
+//     // real meaning: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent#Delta_modes
+//     if (isFirefox && e.deltaMode === 1) {
+//       event.deltaX *= firefoxMult;
+//       event.deltaY *= firefoxMult;
+//     }
+
+//     event.deltaX *= mouseMult;
+//     event.deltaY *= mouseMult;
+
+//     notify(e);
+//   };
+
+//   var onMouseWheel = function(e) {
+//     // In Safari, IE and in Chrome if 'wheel' isn't defined
+//     event.deltaX = e.wheelDeltaX ? e.wheelDeltaX : 0;
+//     event.deltaY = e.wheelDeltaY ? e.wheelDeltaY : e.wheelDelta;
+
+//     notify(e);
+//   };
+
+//   var onTouchStart = function(e) {
+//     var t = e.targetTouches ? e.targetTouches[0] : e;
+//     touchStartX = t.pageX;
+//     touchStartY = t.pageY;
+//   };
+
+//   var onTouchMove = function(e) {
+//     // e.preventDefault(); // < This needs to be managed externally
+//     var t = e.targetTouches ? e.targetTouches[0] : e;
+
+//     event.deltaX = (t.pageX - touchStartX) * touchMult;
+//     event.deltaY = (t.pageY - touchStartY) * touchMult;
+
+//     touchStartX = t.pageX;
+//     touchStartY = t.pageY;
+
+//     notify(e);
+//   };
+
+//   var onKeyDown = function(e) {
+//     // 37 left arrow, 38 up arrow, 39 right arrow, 40 down arrow
+//     event.deltaX = event.deltaY = 0;
+//     switch (e.keyCode) {
+//       case k.left:
+//         event.deltaX = -keyStep;
+//         break;
+//       case k.right:
+//         event.deltaX = keyStep;
+//         break;
+//       case k.up:
+//         event.deltaY = keyStep;
+//         break;
+//       case k.down:
+//         event.deltaY = -keyStep;
+//         break;
+//     }
+
+//     notify(e);
+//   };
+
+//   var initListeners = function() {
+//     if (hasWheelEvent) document.addEventListener("wheel", onWheel);
+//     if (hasMouseWheelEvent)
+//       document.addEventListener("mousewheel", onMouseWheel);
+
+//     // if (hasTouch) {
+//       document.addEventListener("touchstart", onTouchStart);
+//       document.addEventListener("touchmove", onTouchMove);
+//     // }
+
+//     if (hasPointer && hasTouchWin) {
+//       bodyTouchAction = document.body.style.msTouchAction;
+//       document.body.style.msTouchAction = "none";
+//       document.addEventListener("MSPointerDown", onTouchStart, true);
+//       document.addEventListener("MSPointerMove", onTouchMove, true);
+//     }
+
+//     if (hasKeyDown) document.addEventListener("keydown", onKeyDown);
+
+//     initialized = true;
+//   };
+
+//   var destroyListeners = function() {
+//     if (hasWheelEvent) document.removeEventListener("wheel", onWheel);
+//     if (hasMouseWheelEvent)
+//       document.removeEventListener("mousewheel", onMouseWheel);
+
+//     // if (hasTouch) {
+//       document.removeEventListener("touchstart", onTouchStart);
+//       document.removeEventListener("touchmove", onTouchMove);
+//     // }
+
+//     if (hasPointer && hasTouchWin) {
+//       document.body.style.msTouchAction = bodyTouchAction;
+//       document.removeEventListener("MSPointerDown", onTouchStart, true);
+//       document.removeEventListener("MSPointerMove", onTouchMove, true);
+//     }
+
+//     if (hasKeyDown) document.removeEventListener("keydown", onKeyDown);
+
+//     initialized = false;
+//   };
+
+//   return vs;
+// };
+
+
+// //
+// //  Virtual Scroll
+// //
+// export const SmoothScroll = function(elem, scrollFunc) {
+//   var _this = this;
+
+//   // Grab both red boxes
+//   this.elem = elem;
+
+//   // Check how much we can scroll. This value is the
+//   // height of the scrollable element minus the height of the widow
+//   var fullElemHeight = this.elem.getBoundingClientRect().height;
+//   var parentHeight = this.elem.parentNode.offsetHeight;
+//   var elemWidth;// = this.elem.getBoundingClientRect().width - this.elem.;
+//   var elemHeight;// = this.elem.getBoundingClientRect().height - window.innerHeight;
+
+//   // Add easing to the scroll. Play with this value to find a setting that you like.
+//   var ease = 0.1;
+//   var mult = 0.7;
+
+//   // Store current scroll position
+//   var targetX = 0,
+//       targetY = 0;
+//   var currentX = 0,
+//       currentY = 0;
+
+//   var showScrollBar = false;
+
+//   var disable = false;
+//   var isSelf = false;
+
+//   var onScroll = function(e) {
+//     if (!disable && isSelf) {
+//       // Accumulate delta value on each scroll event
+//       targetY += e.deltaY * mult;
+//       targetX += e.deltaX * mult;
+
+//       // Clamp the value so it doesn't go too far up or down
+//       // The value needs to be between 0 and -elemHeight
+//       targetX = Math.max(-elemWidth, targetX);
+//       targetX = Math.min(0, targetX);
+//       targetY = Math.max(-elemHeight, targetY);
+//       targetY = Math.min(0, targetY);
+//     }
+//   };
+
+//   var onAnim = function() {
+//     // Make sure this works across different browsers (use the shim or something)
+
+//     // keep at bottom while resizing
+//     if (-targetX > elemWidth && targetX < 0) targetX = -elemWidth + 1;
+//     if (-targetY > elemHeight && targetY < 0) targetY = -elemHeight + 1;
+//     if(_this.elem.getBoundingClientRect().height < _this.elem.parentNode.offsetHeight)
+//       targetY = 0;
+
+//     // Get closer to the target value at each frame, using ease.
+//     // Other easing methods are also ok.
+//     currentX += (targetX - currentX) * ease;
+//     currentY += (targetY - currentY) * ease;
+
+
+//     // Uncomment this line to scroll horizontally
+//     // currentX += (targetX - currentX) * ease;
+
+//     // Apply CSS style
+//     setTranslate(
+//       _this.elem,
+//       currentX.toFixed(4) + "px",
+//       currentY.toFixed(4) + "px",
+//       0 + "px"
+//     );
+
+//     refresh();
+
+//     if (scrollFunc) scrollFunc(currentY / elemHeight, currentY, elemHeight);
+
+//     if (showScrollBar)
+//       if (fullElemHeight > _this.elem.parentNode.offsetHeight)
+//         rePositionScrollBar(currentY);
+
+//     // lazyLoad.checkAndShowImg();
+//   };
+
+//   addEvent(document, 'mousemove', function(e){
+//     if(_this.scrollBarOuterWrap){
+//       const hasParent = e.target.closest('#contentScroll');
+//       const isScrollbar = e.target.closest('#scrollBarOuterWrap');
 
     // if (hasTouch) {
-      document.addEventListener("touchstart", onTouchStart);
-      document.addEventListener("touchmove", onTouchMove);
+      // document.removeEventListener("touchstart", onTouchStart);
+      // document.removeEventListener("touchmove", onTouchMove);
     // }
 
-    if (hasPointer && hasTouchWin) {
-      bodyTouchAction = document.body.style.msTouchAction;
-      document.body.style.msTouchAction = "none";
-      document.addEventListener("MSPointerDown", onTouchStart, true);
-      document.addEventListener("MSPointerMove", onTouchMove, true);
-    }
+//     if (hasPointer && hasTouchWin) {
+//       document.body.style.msTouchAction = bodyTouchAction;
+//       document.removeEventListener("MSPointerDown", onTouchStart, true);
+//       document.removeEventListener("MSPointerMove", onTouchMove, true);
+//     }
 
-    if (hasKeyDown) document.addEventListener("keydown", onKeyDown);
+//     if (hasKeyDown) document.removeEventListener("keydown", onKeyDown);
 
-    initialized = true;
-  };
+//     initialized = false;
+//   };
 
-  var destroyListeners = function() {
-    if (hasWheelEvent) document.removeEventListener("wheel", onWheel);
-    if (hasMouseWheelEvent)
-      document.removeEventListener("mousewheel", onMouseWheel);
-
-    // if (hasTouch) {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchmove", onTouchMove);
-    // }
-
-    if (hasPointer && hasTouchWin) {
-      document.body.style.msTouchAction = bodyTouchAction;
-      document.removeEventListener("MSPointerDown", onTouchStart, true);
-      document.removeEventListener("MSPointerMove", onTouchMove, true);
-    }
-
-    if (hasKeyDown) document.removeEventListener("keydown", onKeyDown);
-
-    initialized = false;
-  };
-
-  return vs;
-};
+//   return vs;
+// };
 
 
 //
 //  Virtual Scroll
 //
-export const SmoothScroll = function (elem, scrollFunc) {
-  var _this = this;
+// export const SmoothScroll = function (elem, scrollFunc) {
+//   var _this = this;
 
-  // Grab both red boxes
-  this.elem = elem;
+//   // Grab both red boxes
+//   this.elem = elem;
 
-  // Check how much we can scroll. This value is the
-  // height of the scrollable element minus the height of the widow
-  var fullElemHeight = this.elem.getBoundingClientRect().height;
-  var parent = this.elem.parentNode;
-  var parentWidth = parent.offsetWidth;
-  var parentHeight = parent.offsetHeight;
-  var elemWidth;// = this.elem.getBoundingClientRect().width - this.elem.;
-  var elemHeight;// = this.elem.getBoundingClientRect().height - window.innerHeight;
+//   // Check how much we can scroll. This value is the
+//   // height of the scrollable element minus the height of the widow
+//   var fullElemHeight = this.elem.getBoundingClientRect().height;
+//   var parent = this.elem.parentNode;
+//   var parentWidth = parent.offsetWidth;
+//   var parentHeight = parent.offsetHeight;
+//   var elemWidth;// = this.elem.getBoundingClientRect().width - this.elem.;
+//   var elemHeight;// = this.elem.getBoundingClientRect().height - window.innerHeight;
 
-  // Add easing to the scroll. Play with this value to find a setting that you like.
-  var ease = 0.1;
-  var mult = 0.7;
+//   // Add easing to the scroll. Play with this value to find a setting that you like.
+//   var ease = 0.1;
+//   var mult = 0.7;
 
-  // Store current scroll position
-  var targetX = 0,
-    targetY = 0;
-  var currentX = 0,
-    currentY = 0;
+//   // Store current scroll position
+//   var targetX = 0,
+//     targetY = 0;
+//   var currentX = 0,
+//     currentY = 0;
 
-  var showScrollBar = false;
+//   var showScrollBar = false;
 
-  var disable = false;
-  var isSelf = false;
+//   var disable = false;
+//   var isSelf = false;
 
-  var onScroll = function (e) {
-    if (isSelf) {
-      // Accumulate delta value on each scroll event
-      targetY += e.deltaY * mult;
-      targetX += e.deltaX * mult;
+//   var onScroll = function (e) {
+//     if (isSelf) {
+//       // Accumulate delta value on each scroll event
+//       targetY += e.deltaY * mult;
+//       targetX += e.deltaX * mult;
 
-      // Clamp the value so it doesn't go too far up or down
-      // The value needs to be between 0 and -elemHeight
-      targetX = Math.max(-elemWidth, targetX);
-      targetX = Math.min(0, targetX);
-      targetY = Math.max(-elemHeight, targetY);
-      targetY = Math.min(0, targetY);
-    }
-  };
+//       // Clamp the value so it doesn't go too far up or down
+//       // The value needs to be between 0 and -elemHeight
+//       targetX = Math.max(-elemWidth, targetX);
+//       targetX = Math.min(0, targetX);
+//       targetY = Math.max(-elemHeight, targetY);
+//       targetY = Math.min(0, targetY);
+//     }
+//   };
 
-  var onAnim = function () {
+//   var onAnim = function () {
 
-    // keep at bottom while resizing
-    if (-targetX > elemWidth && targetX < 0) targetX = -elemWidth + 1;
-    if (-targetY > elemHeight && targetY < 0) targetY = -elemHeight + 1;
-    if (_this.elem.getBoundingClientRect().height <= parentHeight) {
-      targetY = 0;
-    } else {
-      // Get closer to the target value at each frame, using ease.
-      // Other easing methods are also ok.
-      currentX += (targetX - currentX) * ease;
-      currentY += (targetY - currentY) * ease;
-
-
-      // Uncomment this line to scroll horizontally
-      // currentX += (targetX - currentX) * ease;
-
-      // Apply CSS style
-      setTranslate(
-        _this.elem,
-        currentX.toFixed(4) + "px",
-        currentY.toFixed(4) + "px",
-        0 + "px"
-      );
-
-      refresh();
-
-      if (scrollFunc) scrollFunc(currentY / elemHeight, currentY, elemHeight);
+//     // keep at bottom while resizing
+//     if (-targetX > elemWidth && targetX < 0) targetX = -elemWidth + 1;
+//     if (-targetY > elemHeight && targetY < 0) targetY = -elemHeight + 1;
+//     if (_this.elem.getBoundingClientRect().height <= parentHeight) {
+//       targetY = 0;
+//     } else {
+//       // Get closer to the target value at each frame, using ease.
+//       // Other easing methods are also ok.
+//       currentX += (targetX - currentX) * ease;
+//       currentY += (targetY - currentY) * ease;
 
 
-      if (showScrollBar)
-        if (fullElemHeight > parentHeight)
-          rePositionScrollBar(currentY);
-    }
-    // lazyLoad.checkAndShowImg();
-  };
+//       // Uncomment this line to scroll horizontally
+//       // currentX += (targetX - currentX) * ease;
+
+//       // Apply CSS style
+//       setTranslate(
+//         _this.elem,
+//         currentX.toFixed(4) + "px",
+//         currentY.toFixed(4) + "px",
+//         0 + "px"
+//       );
+
+//       refresh();
+
+//       if (scrollFunc) scrollFunc(currentY / elemHeight, currentY, elemHeight);
 
 
-  addEvent(document, 'mousemove', function (e) {
-    if (_this.scrollBarOuterWrap) {
-      const mainScrollElem = e.target.closest('#mainScroll');
-      const childScrollElem = e.target.closest('#childScroll');
-      const isScrollbar = e.target.closest('#scrollBarOuterWrap');
+//       if (showScrollBar)
+//         if (fullElemHeight > parentHeight)
+//           rePositionScrollBar(currentY);
+//     }
+//     // lazyLoad.checkAndShowImg();
+//   };
 
-      if (isScrollbar) return;
-      if (e.target.closest('.disable')) return;
 
-      addClass(_this.scrollBarOuterWrap, "hide");
-      isSelf = false;
+//   addEvent(document, 'mousemove', function (e) {
+//     if (_this.scrollBarOuterWrap) {
+//       const mainScrollElem = e.target.closest('#mainScroll');
+//       const childScrollElem = e.target.closest('#childScroll');
+//       const isScrollbar = e.target.closest('#scrollBarOuterWrap');
 
-      if (childScrollElem) {
-        if (_this.elem === childScrollElem) {
-          // console.log('in child')
-          isSelf = true;
-          removeClass(_this.scrollBarOuterWrap, "hide");
-        }
-      }
-      else {
-        if (_this.elem === mainScrollElem) {
-          // console.log('in parent')
-          isSelf = true;
-          removeClass(_this.scrollBarOuterWrap, "hide");
-        }
-      }
-    }
-  })
+//       if (isScrollbar) return;
+//       if (e.target.closest('.disable')) return;
 
-  var initScrollBar = function () {
-    _this.oldMouseY = 0;
-    _this.scrollBarOuterWrap = document.createElement("div");
-    _this.scrollBarWrap = document.createElement("div");
-    _this.scrollBar = document.createElement("div");
+//       addClass(_this.scrollBarOuterWrap, "hide");
+//       isSelf = false;
 
-    _this.scrollBarOuterWrap.setAttribute("id", "scrollBarOuterWrap");
-    _this.scrollBarWrap.setAttribute("id", "scrollBarWrap");
-    _this.scrollBar.setAttribute("id", "scrollBar");
+//       if (childScrollElem) {
+//         if (_this.elem === childScrollElem) {
+//           // console.log('in child')
+//           isSelf = true;
+//           removeClass(_this.scrollBarOuterWrap, "hide");
+//         }
+//       }
+//       else {
+//         if (_this.elem === mainScrollElem) {
+//           // console.log('in parent')
+//           isSelf = true;
+//           removeClass(_this.scrollBarOuterWrap, "hide");
+//         }
+//       }
+//     }
+//   })
 
-    addEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
+//   var initScrollBar = function () {
+//     _this.oldMouseY = 0;
+//     _this.scrollBarOuterWrap = document.createElement("div");
+//     _this.scrollBarWrap = document.createElement("div");
+//     _this.scrollBar = document.createElement("div");
 
-    _this.scrollBarWrap.appendChild(_this.scrollBar);
-    _this.scrollBarOuterWrap.appendChild(_this.scrollBarWrap);
-    parent.appendChild(_this.scrollBarOuterWrap);
+//     _this.scrollBarOuterWrap.setAttribute("id", "scrollBarOuterWrap");
+//     _this.scrollBarWrap.setAttribute("id", "scrollBarWrap");
+//     _this.scrollBar.setAttribute("id", "scrollBar");
 
-    if (_this.elem.id === 'childScroll') {
-      addClass(_this.scrollBarOuterWrap, 'hide');
-    }
-  };
+//     addEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
 
-  var rePositionScrollBar = function (y) {
-    var scrollBarHeight = (1 - elemHeight / fullElemHeight) * 100;
-    _this.scrollBar.style.height = scrollBarHeight + "%";
-    _this.scrollBarY = (_this.scrollBarWrap.offsetHeight - _this.scrollBar.offsetHeight) * (y / elemHeight);
+//     _this.scrollBarWrap.appendChild(_this.scrollBar);
+//     _this.scrollBarOuterWrap.appendChild(_this.scrollBarWrap);
+//     parent.appendChild(_this.scrollBarOuterWrap);
 
-    setTranslate(_this.scrollBar, '-50%', -_this.scrollBarY.toFixed(4) + "px", 0 + "px");
-  };
+//     if (_this.elem.id === 'childScroll') {
+//       addClass(_this.scrollBarOuterWrap, 'hide');
+//     }
+//   };
 
-  var onMouseDownScrollBar = function (e) {
-    e.preventDefault();
-    _this.oldMouseY = e.pageY;
-    _this.clickedScrollBar = true;
-    addClass(this, "active");
+//   var rePositionScrollBar = function (y) {
+//     var scrollBarHeight = (1 - elemHeight / fullElemHeight) * 100;
+//     _this.scrollBar.style.height = scrollBarHeight + "%";
+//     _this.scrollBarY = (_this.scrollBarWrap.offsetHeight - _this.scrollBar.offsetHeight) * (y / elemHeight);
 
-    addEvent(document, "mousemove", onMoveScrollBar);
-    addEvent(document, "mouseup", onMouseUpScrollBar);
-  };
+//     setTranslate(_this.scrollBar, '-50%', -_this.scrollBarY.toFixed(4) + "px", 0 + "px");
+//   };
 
-  var onMoveScrollBar = function (e) {
-    if (_this.clickedScrollBar) {
-      var y = _this.oldMouseY - e.pageY;
-      targetY += y * (fullElemHeight / parentHeight);
+//   var onMouseDownScrollBar = function (e) {
+//     e.preventDefault();
+//     _this.oldMouseY = e.pageY;
+//     _this.clickedScrollBar = true;
+//     addClass(this, "active");
 
-      targetY = Math.max(-elemHeight, targetY);
-      targetY = Math.min(0, targetY);
+//     addEvent(document, "mousemove", onMoveScrollBar);
+//     addEvent(document, "mouseup", onMouseUpScrollBar);
+//   };
 
-      _this.oldMouseY = e.pageY;
-    }
-  };
+//   var onMoveScrollBar = function (e) {
+//     if (_this.clickedScrollBar) {
+//       var y = _this.oldMouseY - e.pageY;
+//       targetY += y * (fullElemHeight / parentHeight);
 
-  var onMouseUpScrollBar = function () {
-    _this.clickedScrollBar = false;
-    removeClass(_this.scrollBar, "active");
+// //       targetY = Math.max(-elemHeight, targetY);
+// //       targetY = Math.min(0, targetY);
 
-    removeEvent(document, "mousemove", onMoveScrollBar);
-    removeEvent(document, "mouseup", onMouseUpScrollBar);
-  };
+// //       _this.oldMouseY = e.pageY;
+// //     }
+// //   };
 
-  var reset = function () {
-    currentY = 0;
-    targetY = 0;
-  };
+//   var onMouseUpScrollBar = function () {
+//     _this.clickedScrollBar = false;
+//     removeClass(_this.scrollBar, "active");
 
-  var refresh = function () {
-    if (parent != null) {
-      fullElemHeight = _this.elem.getBoundingClientRect().height;
-      elemWidth = _this.elem.getBoundingClientRect().width - parentWidth;
-      elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
-    }
-  };
+//     removeEvent(document, "mousemove", onMoveScrollBar);
+//     removeEvent(document, "mouseup", onMouseUpScrollBar);
+//   };
 
-  var to = function (y) {
-    elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
-    targetY = Math.max(-elemHeight, y);
-  };
-  var set = function (y) {
-    currentY = y;
-    targetY = y;
-  };
+//   var reset = function () {
+//     currentY = 0;
+//     targetY = 0;
+//   };
 
-  const vs = VirtualScroll();
-  const fi = FrameImpulse();
-  var isOn = false;
-  var on = function () {
-    isOn = true;
-    refresh();
-    onResize();
-    initScrollBar();
-    onShowScrollBar();
-    vs.on(onScroll);
-    fi.on(onAnim);
-  };
+//   var refresh = function () {
+//     if (parent != null) {
+//       fullElemHeight = _this.elem.getBoundingClientRect().height;
+//       elemWidth = _this.elem.getBoundingClientRect().width - parentWidth;
+//       elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
+//     }
+//   };
 
-  var off = function () {
-    isOn = false;
-    vs.off(onScroll);
-    fi.off(onAnim);
-    onHideScrollBar();
-    destroy();
-  };
+//   var to = function (y) {
+//     elemHeight = _this.elem.getBoundingClientRect().height - parentHeight;
+//     targetY = Math.max(-elemHeight, y);
+//   };
+//   var set = function (y) {
+//     currentY = y;
+//     targetY = y;
+//   };
 
-  var destroy = function () {
-    if (_this.scrollBarOuterWrap) {
-      removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
-      _this.scrollBarOuterWrap.remove();
-      _this.scrollBarOuterWrap = null;
-      _this.scrollBarWrap = null;
-      _this.scrollBar = null;
-    }
-  }
+//   const vs = VirtualScroll();
+//   const fi = FrameImpulse();
+//   var isOn = false;
+//   var on = function () {
+//     isOn = true;
+//     refresh();
+//     onResize();
+//     initScrollBar();
+//     onShowScrollBar();
+//     vs.on(onScroll);
+//     fi.on(onAnim);
+//   };
 
-  var onResize = function () {
-    parentHeight = parent.offsetHeight;
+//   var off = function () {
+//     isOn = false;
+//     vs.off(onScroll);
+//     fi.off(onAnim);
+//     onHideScrollBar();
+//     destroy();
+//   };
 
-    if (_this.elem.getBoundingClientRect().height <= parentHeight) {
-      if (!hasClass(_this.elem, 'disable'))
-        addClass(_this.elem, 'disable');
-    }
-    else {
-      if (hasClass(_this.elem, 'disable'))
-        removeClass(_this.elem, 'disable');
-    }
+//   var destroy = function () {
+//     if (_this.scrollBarOuterWrap) {
+//       removeEvent(_this.scrollBar, "mousedown", onMouseDownScrollBar);
+//       _this.scrollBarOuterWrap.remove();
+//       _this.scrollBarOuterWrap = null;
+//       _this.scrollBarWrap = null;
+//       _this.scrollBar = null;
+//     }
+//   }
 
-    if (isMobile()) {
-      if (isOn) {
-        off();
-        setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
-      }
-    } else {
-      if (!isOn) {
-        on();
-      }
-      if (disable) onEnable();
-    }
-  };
-  var onDisable = function () {
-    disable = true;
-  };
-  var onEnable = function () {
-    disable = false;
-  };
+//   var onResize = function () {
+//     parentHeight = parent.offsetHeight;
 
-  var onShowScrollBar = function () {
-    showScrollBar = true;
-    // removeClass(_this.scrollBarOuterWrap,'hide');
-  };
-  var onHideScrollBar = function () {
-    showScrollBar = false;
-    if (_this.scrollBarOuterWrap) addClass(_this.scrollBarOuterWrap, 'hide');
-  };
+//     if (_this.elem.getBoundingClientRect().height <= parentHeight) {
+//       if (!hasClass(_this.elem, 'disable'))
+//         addClass(_this.elem, 'disable');
+//     }
+//     else {
+//       if (hasClass(_this.elem, 'disable'))
+//         removeClass(_this.elem, 'disable');
+//     }
 
-  var init = function () {
-    if (!isMobile()) {
-      on();
-    }
-    addEvent(window, "resize", onResize);
-  };
+//     if (isMobile()) {
+//       if (isOn) {
+//         off();
+//         setTranslate(_this.elem, 0 + "px", 0 + "px", 0 + "px");
+//       }
+//     } else {
+//       if (!isOn) {
+//         on();
+//       }
+//       if (disable) onEnable();
+//     }
+//   };
+//   var onDisable = function () {
+//     disable = true;
+//   };
+//   var onEnable = function () {
+//     disable = false;
+//   };
 
-  init();
+//   var onShowScrollBar = function () {
+//     showScrollBar = true;
+//     // removeClass(_this.scrollBarOuterWrap,'hide');
+//   };
+//   var onHideScrollBar = function () {
+//     showScrollBar = false;
+//     if (_this.scrollBarOuterWrap) addClass(_this.scrollBarOuterWrap, 'hide');
+//   };
 
-  return {
-    reset: reset,
-    refresh: refresh,
-    onResize: onResize,
-    set: set,
-    to: to,
-    on: on,
-    off: off,
-    disable: onDisable,
-    enable: onEnable,
-    showScrollBar: onShowScrollBar,
-    hideScrollBar: onHideScrollBar,
-    destroy: destroy
-  };
-};
+//   var init = function () {
+//     if (!isMobile()) {
+//       on();
+//     }
+//     addEvent(window, "resize", onResize);
+//   };
+
+//   init();
+
+//   return {
+//     reset: reset,
+//     refresh: refresh,
+//     onResize: onResize,
+//     set: set,
+//     to: to,
+//     on: on,
+//     off: off,
+//     disable: onDisable,
+//     enable: onEnable,
+//     showScrollBar: onShowScrollBar,
+//     hideScrollBar: onHideScrollBar,
+//     destroy: destroy
+//   };
+// };
 
 
 export const usePrevious = (value) => {
