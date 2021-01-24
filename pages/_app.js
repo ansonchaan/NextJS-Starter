@@ -80,7 +80,7 @@ const MyApp = ({ Component, pageProps, router }) => {
             title[i] = decodeURIComponent(title[i].charAt(0).toUpperCase() + title[i].slice(1));
         }
 
-        return title.length ? title.reverse().join(' | ') : 'Barwo';
+        return title.length ? title.reverse().join(' | ') : 'title';
     }
 
     const onExitComplete = () => {
