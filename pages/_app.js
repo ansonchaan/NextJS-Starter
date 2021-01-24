@@ -23,11 +23,9 @@ const MyApp = ({ Component, pageProps, router }) => {
     const prevPage = usePrevious(page);
     const dispatch = useDispatch();
     const language = useSelector(state => state.language);
-    // const route = useRouter();
     const {asPath, pathname, basePath, route} = router;
-    // console.log(route)
-    // const smooth = useRef(null);
-    // const scrollWrap = useRef(null);
+    const scroll = useRef(null);
+    const scrollWrap = useRef(null);
     
 
     useEffect(()=>{
@@ -49,10 +47,6 @@ const MyApp = ({ Component, pageProps, router }) => {
     useEffect(()=>{
         if(page !== prevPage && page !== null){
             dispatch({type:'UPDATE_PAGE', page:page});
-            // if(scroll.current){
-            //     scroll.current.destroy();
-            //     scroll.current.init();
-            // }
         }
     },[page])
 
@@ -61,6 +55,20 @@ const MyApp = ({ Component, pageProps, router }) => {
         window.addEventListener('resize', ()=>adjustFontSize());
         return () => {
             window.removeEventListener('resize', ()=>adjustFontSize());
+        }
+    },[])
+
+    useEffect(()=>{
+        import("locomotive-scroll").then(LM => {
+            scroll.current = new LM.Smooth({
+                el: scrollWrap.current,
+                smooth: true
+            });
+        })
+    
+        return () => {
+            if(scroll.current)
+                scroll.current.destroy();
         }
     },[])
     
@@ -75,6 +83,13 @@ const MyApp = ({ Component, pageProps, router }) => {
         return title.length ? title.reverse().join(' | ') : 'Barwo';
     }
 
+    const onExitComplete = () => {
+        if(scroll.current){
+            scroll.current.destroy();
+            scroll.current.init();
+        }
+    }
+
     return (
         <>
             <Head>
@@ -83,9 +98,11 @@ const MyApp = ({ Component, pageProps, router }) => {
             </Head>
             <div id="bodyWrap" className={`${language} ${page}`}>
                 <Nav/>
-                <AnimatePresence initial={false} exitBeforeEnter>
-                    <Component {...pageProps} key={route}/>
-                </AnimatePresence>
+                <div ref={scrollWrap} id="scrollWrap">
+                    <AnimatePresence initial={false} exitBeforeEnter onExitComplete={onExitComplete}>
+                        <Component {...pageProps} key={route}/>
+                    </AnimatePresence>
+                </div>
             </div>
         </>
     )
