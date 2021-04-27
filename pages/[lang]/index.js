@@ -11,9 +11,9 @@ const Home = () => {
 
   return (
     <div id="home">
-      <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+      <motion.span initial={{scale:0}} animate={{scale:1}} exit={{scale:0}}>
         Home {language}
-      </motion.div>
+      </motion.span>
     </div>
   )
 }
